@@ -1,7 +1,7 @@
 import json
 from typing import Dict
 
-from apscheduler.schedulers.blocking import BlockingScheduler
+#from apscheduler.schedulers.blocking import BlockingScheduler
 import requests
 
 from sars_cov_2_mx.utils import get_text
@@ -12,7 +12,7 @@ from sars_cov_2_mx.settings import (
 )
 
 
-sched = BlockingScheduler()
+#sched = BlockingScheduler()
 
 
 def get_headers() -> Dict[str, str]:
@@ -34,7 +34,7 @@ def get_payload() -> Dict:
         }
 
 
-@sched.scheduled_job('cron', day_of_week='mon-sun', hour=17)
+#@sched.scheduled_job('cron', day_of_week='mon-sun', hour=17)
 def main():
     headers = get_headers()
     payload = get_payload()
@@ -48,4 +48,6 @@ def main():
 
 
 if __name__ == "__main__":
-    sched.start()
+    #sched.start()
+    main()
+
