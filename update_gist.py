@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import Dict
 
 #from apscheduler.schedulers.blocking import BlockingScheduler
@@ -13,6 +14,7 @@ from sars_cov_2_mx.settings import (
 
 
 #sched = BlockingScheduler()
+logger = logging.getLogger(__name__)
 
 
 def get_headers() -> Dict[str, str]:
@@ -38,13 +40,13 @@ def get_payload() -> Dict:
 def main():
     headers = get_headers()
     payload = get_payload()
+    gist_url = f"https://api.github.com/gists/{COV_GIST_ID}"
     response = requests.patch(
-        f"https://api.github.com/gists/{COV_GIST_ID}",
+        gist_url,
         data=json.dumps(payload),
         headers=headers,
     )
-    if not response.ok:
-        raise ValueError("Error in main process: %s", response.text)
+    print(response.text)
 
 
 if __name__ == "__main__":
