@@ -1,12 +1,13 @@
 import json
 import logging
-from typing import Dict
+from typing import Dict, Tuple
 
 #from apscheduler.schedulers.blocking import BlockingScheduler
 import requests
 
 from sars_cov_2_mx.utils import get_text
 from sars_cov_2_mx.settings import (
+    get_logger,
     COV_FILENAME,
     COV_GIST_ID,
     COV_TOKEN,
@@ -14,7 +15,7 @@ from sars_cov_2_mx.settings import (
 
 
 #sched = BlockingScheduler()
-logger = logging.getLogger(__name__)
+logger = get_logger(name=__name__)
 
 
 def get_headers() -> Dict[str, str]:
@@ -23,11 +24,13 @@ def get_headers() -> Dict[str, str]:
     }
 
 
-def get_payload() -> Dict:
-    latest_data = get_text(lag=5)
-    if not latest_data:
+def get_payload() -> Tuple[str, Dict]:
+    response = get_text(lag=3)
+    if not response:
         raise ValueError("Error when downloading the latest data.")
-    return {
+
+    date, latest_data = response
+    return date, {
             "files": {
                 COV_FILENAME: {
                     "content": latest_data
@@ -39,14 +42,19 @@ def get_payload() -> Dict:
 #@sched.scheduled_job('cron', day_of_week='mon-sun', hour=17)
 def main():
     headers = get_headers()
-    payload = get_payload()
+    date, payload = get_payload()
     gist_url = f"https://api.github.com/gists/{COV_GIST_ID}"
+
+    logger.info("Attempting Gist Update with data from: %s", date)
     response = requests.patch(
         gist_url,
         data=json.dumps(payload),
         headers=headers,
     )
-    print(response.text)
+    if not response.ok:
+        logger.error(response.text)
+        raise ValueError("Response not okay.")
+    logger.info("Ok!")
 
 
 if __name__ == "__main__":
